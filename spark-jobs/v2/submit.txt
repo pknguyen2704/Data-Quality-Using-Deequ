@@ -1,0 +1,34 @@
+# Data Profiling
+../bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --conf spark.date_hour="2025-10-27 10:00:00" \
+  --conf spark.table=netpm.cdr \
+  --conf spark.pushgateway.url=http://pushgateway:9091 \
+  jobs/data_quality_platform/AutoDQ_DataProfiling.py
+
+# Constraints Suggestion
+../bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --conf spark.date_hour="2025-10-27 5:00:00" \
+  --conf spark.table=netpm.cdr \
+  --conf spark.read_days=2 \
+  --conf spark.top_low_ratio=0.8 \
+  jobs/data_quality_platform/AutoDQ_ConstraintsSuggestion.py
+
+# Constraints verification
+../bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --conf spark.date_hour="2025-10-27 10:00:00" \
+  --conf spark.table=netpm.cdr \
+  --conf spark.pushgateway.url=http://pushgateway:9091 \
+  jobs/data_quality_platform/AutoDQ_ConstraintsVerification.py
+
+# Anomaly Detection
+../bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --conf spark.date_hour="2025-10-27 10:00:00" \
+  --conf spark.table_name=netpm.cdr \
+  --conf spark.read_days=2 \
+  --conf spark.pushgateway.url=pushgateway:9091 \
+  --conf spark.exclude_cols=call_start,call_end,record_id \
+  jobs/data_quality_platform/AutoDQ_AnomalyDetection.py

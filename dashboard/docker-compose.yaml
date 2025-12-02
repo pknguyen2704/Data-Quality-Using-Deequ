@@ -1,0 +1,68 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.6.0
+    container_name: prometheus
+    hostname: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - ./data/prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - "9090:9090"
+    networks:
+      - dqp_net
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    container_name: alertmanager
+    hostname: alertmanager
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+    environment:  
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - "9093:9093"
+    networks:
+      - dqp_net
+
+  grafana:
+    image: grafana/grafana:12.2
+    container_name: grafana
+    hostname: grafana
+    volumes:
+      - ./data/grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:  
+      - TZ=Asia/Ho_Chi_Minh
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    ports:
+      - "3000:3000"
+    networks:
+      - dqp_net
+
+  pushgateway:
+    image: prom/pushgateway:v1.11.1
+    container_name: pushgateway
+    environment:  
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - "9091:9091"
+    networks:
+      - dqp_net
+networks:
+  dqp_net:
+    external: true
